@@ -1,4 +1,9 @@
-﻿namespace HistoriaClinicaMVC
+﻿using HistoriaClinicaMVC.Data;
+using HistoriaClinicaMVC.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+
+namespace HistoriaClinicaMVC
 {
 
     public static class Startup
@@ -16,13 +21,28 @@
 
     private static void ConfigureServices(WebApplicationBuilder builder)
   {
-        // Add services to the container.
+
+        builder.Services.AddDbContext<HistoriaClinicaContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("HCADBCS")));
+
+        builder.Services.AddIdentity<Persona, Rol>().AddEntityFrameworkStores<HistoriaClinicaContext>();
+            builder.Services.Configure<IdentityOptions>(opciones =>
+
+              {
+                  opciones.Password.RequireNonAlphanumeric = false;
+                  opciones.Password.RequireUppercase = false;
+                  opciones.Password.RequireLowercase = false;
+                  opciones.Password.RequireDigit = false;
+                  opciones.Password.RequiredLength = 5;
+              }
+                
+                ) ;
+
         builder.Services.AddControllersWithViews();
   }
 
    private static void Configure(WebApplication app)
    {
-        // Configure the HTTP request pipeline.
+        
         if (!app.Environment.IsDevelopment())
         {
             app.UseExceptionHandler("/Home/Error");
@@ -35,6 +55,7 @@
 
         app.UseRouting();
 
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllerRoute(
